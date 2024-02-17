@@ -1,0 +1,68 @@
+---
+title: "HW 2 Student"
+author: "Andy Ackerman"
+date: "10/17/2023"
+output: 
+  html_document:
+    number_sections: true
+---
+
+This homework is meant to illustrate the methods of classification algorithms as well as their potential pitfalls.  In class, we demonstrated K-Nearest-Neighbors using the `iris` dataset.  Today I will give you a different subset of this same data, and you will train a KNN classifier.  
+
+```{r, echo = FALSE}
+set.seed(123)
+library(class)
+library(tidyverse)
+
+df <- data(iris) 
+
+normal <-function(x) {
+  (x -min(x))/(max(x)-min(x))   
+}
+
+iris_norm <- as.data.frame(lapply(iris[,c(1,2,3,4)], normal))
+
+subset <- c(1:45, 58, 60:70, 82, 94, 110:150)
+iris_train <- iris_norm[subset,] 
+iris_test <- iris_norm[-subset,] 
+
+iris_target_category <- iris[subset,5]
+iris_test_category <- iris[-subset,5]
+
+
+```
+
+#
+Above, I have given you a training-testing partition.  Train the KNN with $K = 5$ on the training data and use this to classify the 50 test observations.  Once you have classified the test observations, create a contingency table -- like we did in class -- to evaluate which observations your algorithm is misclassifying.   
+
+```{r}
+set.seed(123)
+
+tab <- knn(iris_train, iris_test, cl = iris_target_category, k = 5) %>% # KNN Test using iris_train as the training data, iris_test as the testing data, iris_target_category as the classifer, and classifying based on the class of the 5 nearest neighbors
+  table(iris_test_category) # Contingency table
+
+tab
+
+accuracy <- function(x){
+  sum(diag(x)/(sum(rowSums(x)))) * 100 # Calculates the accuracy of the model
+}
+accuracy(tab)
+```
+
+#
+
+Discuss your results.  If you have done this correctly, you should have a classification error rate that is roughly 20% higher than what we observed in class.  Why is this the case? In particular run a summary of the `iris_test_category` as well as `iris_target_category` and discuss how this plays a role in your answer.  
+
+```{r}
+summary(iris_test_category)
+summary(iris_target_category)
+```
+
+*The model incorrectly classified 11 virginica plants as versicolor, resulting in a 78% accuracy. This is lower than the in-class version because the training set is not representative of the testing set --- versicolor plants are overrepresented. Therefore, because there are more versicolor plants clustered, higher values of k will cause a point to be more likely to be classified as versicolor.* 
+
+#
+
+Build a github repository to store your homework assignments.  Share the link in this file.  
+
+*STUDENT INPUT*
+
